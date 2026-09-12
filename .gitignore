@@ -1,0 +1,45 @@
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Editors & IDEs
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# Swap & Temporary Files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+*.temp
+*.log
+
+# Compressed Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Keyboard Build & Compiler Artifacts (safe defaults if you compile locally)
+*.obj
+*.o
+*.elf
+*.bin
+*.map
+
+# Keep tracked repo deliverables (ensure .hex and .json are never ignored)
+!via/**/*.hex
+!via/**/*.json
+!vial/**/*.hex
+!vial/**/*.json
