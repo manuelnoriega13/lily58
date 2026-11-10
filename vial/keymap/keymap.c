@@ -109,113 +109,78 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     return state;
 }
 
-enum modifier_glyph_index { GLYPH_A, GLYPH_C, GLYPH_D, GLYPH_F, GLYPH_H, GLYPH_I, GLYPH_L, GLYPH_M, GLYPH_P, GLYPH_R, GLYPH_S, GLYPH_T };
+// Fuente proporcional 3–5 x 7: CONTROL y DEFAULT caben en los 32 px de ancho.
+typedef struct {
+    char letter;
+    uint8_t width;
+    uint8_t columns[5]; // El bit menos significativo es el píxel superior.
+} status_glyph_t;
 
-// 3x5 uppercase glyphs, packed as five 3-bit rows.
-static const uint16_t modifier_font[] PROGMEM = {
-    (2 << 12) | (5 << 9) | (7 << 6) | (5 << 3) | 5, // A
-    (3 << 12) | (4 << 9) | (4 << 6) | (4 << 3) | 3, // C
-    (6 << 12) | (5 << 9) | (5 << 6) | (5 << 3) | 6, // D
-    (7 << 12) | (4 << 9) | (6 << 6) | (4 << 3) | 4, // F
-    (5 << 12) | (5 << 9) | (7 << 6) | (5 << 3) | 5, // H
-    (7 << 12) | (2 << 9) | (2 << 6) | (2 << 3) | 7, // I
-    (4 << 12) | (4 << 9) | (4 << 6) | (4 << 3) | 7, // L
-    (5 << 12) | (7 << 9) | (7 << 6) | (5 << 3) | 5, // M
-    (6 << 12) | (5 << 9) | (6 << 6) | (4 << 3) | 4, // P
-    (6 << 12) | (5 << 9) | (6 << 6) | (5 << 3) | 5, // R
-    (3 << 12) | (4 << 9) | (2 << 6) | (1 << 3) | 6, // S
-    (7 << 12) | (2 << 9) | (2 << 6) | (2 << 3) | 2  // T
+static const status_glyph_t status_font[] PROGMEM = {
+    {' ', 2, {0}}, {'A', 4, {0x7e,0x09,0x09,0x7e}},
+    {'C', 4, {0x3e,0x41,0x41,0x22}}, {'D', 4, {0x7f,0x41,0x41,0x3e}},
+    {'E', 3, {0x7f,0x49,0x41}}, {'F', 3, {0x7f,0x09,0x01}},
+    {'H', 4, {0x7f,0x08,0x08,0x7f}}, {'I', 3, {0x41,0x7f,0x41}},
+    {'K', 4, {0x7f,0x08,0x14,0x63}}, {'L', 3, {0x7f,0x40,0x40}},
+    {'M', 5, {0x7f,0x02,0x0c,0x02,0x7f}}, {'N', 4, {0x7f,0x04,0x18,0x7f}},
+    {'O', 4, {0x3e,0x41,0x41,0x3e}}, {'P', 4, {0x7f,0x09,0x09,0x06}},
+    {'R', 4, {0x7f,0x09,0x19,0x66}}, {'S', 4, {0x46,0x49,0x49,0x31}},
+    {'T', 3, {0x01,0x7f,0x01}}, {'U', 4, {0x3f,0x40,0x40,0x3f}},
+    {'W', 5, {0x3f,0x40,0x38,0x40,0x3f}}, {'Y', 5, {0x03,0x04,0x78,0x04,0x03}},
 };
 
-static const uint8_t label_shift[] PROGMEM = {GLYPH_S, GLYPH_H, GLYPH_I, GLYPH_F, GLYPH_T};
-static const uint8_t label_ctrl[] PROGMEM  = {GLYPH_C, GLYPH_T, GLYPH_R, GLYPH_L};
-static const uint8_t label_alt[] PROGMEM   = {GLYPH_A, GLYPH_L, GLYPH_T};
-static const uint8_t label_cmd[] PROGMEM   = {GLYPH_C, GLYPH_M, GLYPH_D};
-static const uint8_t label_caps[] PROGMEM  = {GLYPH_C, GLYPH_A, GLYPH_P, GLYPH_S};
-
-static void draw_modifier_indicator(uint8_t y, const uint8_t *label, uint8_t length, bool active) {
-    const uint8_t x             = 0;
-    const uint8_t width         = 32;
-    const uint8_t height        = 22;
-    const uint8_t scale         = 2;
-    const uint8_t char_width    = 3;
-    const uint8_t text_width    = length * char_width * scale;
-    const uint8_t content_width = width - 2;
-    const uint8_t text_x        = x + 1 + (content_width - text_width) / 2;
-    const uint8_t text_y        = y + (height - 5 * scale) / 2;
-
-    // Active modifiers get a filled box; inactive ones keep an outline.
-    for (uint8_t py = 0; py < height; py++) {
-        for (uint8_t px = 0; px < width; px++) {
-            bool border = px == 0 || px == width - 1 || py == 0 || py == height - 1;
-            if (active || border) {
-                oled_write_pixel(x + px, y + py, true);
-            }
-        }
+static const status_glyph_t *status_glyph(char letter) {
+    for (uint8_t i = 0; i < ARRAY_SIZE(status_font); ++i) {
+        if (pgm_read_byte(&status_font[i].letter) == letter) return &status_font[i];
     }
-
-    // Draw the label at 2x scale, inverting it inside an active box.
-    for (uint8_t index = 0; index < length; index++) {
-        uint8_t  glyph_index = pgm_read_byte(&label[index]);
-        uint16_t glyph       = pgm_read_word(&modifier_font[glyph_index]);
-        for (uint8_t row = 0; row < 5; row++) {
-            uint8_t pixels = (glyph >> ((4 - row) * 3)) & 0b111;
-            for (uint8_t col = 0; col < char_width; col++) {
-                if (pixels & (1 << (2 - col))) {
-                    for (uint8_t sy = 0; sy < scale; sy++) {
-                        for (uint8_t sx = 0; sx < scale; sx++) {
-                            oled_write_pixel(text_x + index * char_width * scale + col * scale + sx, text_y + row * scale + sy, !active);
-                        }
-                    }
-                }
-            }
-        }
-    }
+    return &status_font[0];
 }
 
-// 3x5 column masks (bit 0 at the top), in the empty strip above CMD.
-static void draw_profile(keyboard_profile_t profile, bool inverted) {
-    static const uint8_t labels[][21] PROGMEM = {
-        [PROFILE_DEFAULT] = {31,17,14, 31,21,17, 31,5,1, 30,5,30, 31,16,31, 31,16,16, 1,31,1},
-        [PROFILE_MAC]     = {31,2,31, 30,5,30, 14,17,17},
-        [PROFILE_NON_MAC] = {31,6,31, 14,17,14, 31,6,31, 4,4,4, 31,2,31, 30,5,30, 14,17,17},
-    };
-    uint8_t letters = profile == PROFILE_MAC ? 3 : 7;
-    for (uint8_t i = 0; i < letters * 3; ++i) {
-        uint8_t bits = pgm_read_byte(&labels[profile][i]);
-        uint8_t x = (33 - letters * 4) / 2 + i + i / 3;
-        for (uint8_t y = 0; y < 5; ++y) {
-            oled_write_pixel(x, 79 + y, ((bits >> y) & 1) != inverted);
+static void write_status_line(uint8_t y, const char *label, bool active) {
+    uint8_t width = 0;
+    for (const char *p = label; pgm_read_byte(p); ++p) {
+        width += pgm_read_byte(&status_glyph(pgm_read_byte(p))->width) + 1;
+    }
+    uint8_t x = (33 - width) / 2; // width incluye el espacio final.
+    for (uint8_t col = 0; col < 32; ++col) {
+        for (uint8_t row = 0; row < 11; ++row) oled_write_pixel(col, y + row, active);
+    }
+    for (const char *p = label; pgm_read_byte(p); ++p) {
+        const status_glyph_t *glyph = status_glyph(pgm_read_byte(p));
+        for (uint8_t col = 0; col < pgm_read_byte(&glyph->width); ++col, ++x) {
+            uint8_t bits = pgm_read_byte(&glyph->columns[col]);
+            for (uint8_t row = 0; row < 7; ++row) {
+                if (bits & (1 << row)) oled_write_pixel(x, y + row + 2, !active);
+            }
         }
+        ++x;
     }
 }
 
 static void render_mod_status(void) {
-    uint8_t mods   = get_mods();
-    led_t   leds   = host_keyboard_led_state();
-    uint8_t status = 0;
-
-    if (mods & MOD_MASK_SHIFT) status |= 1 << 0;
-    if (mods & MOD_MASK_CTRL) status |= 1 << 1;
-    if (mods & MOD_MASK_ALT) status |= 1 << 2;
-    if (mods & MOD_MASK_GUI) status |= 1 << 3;
-    if (leds.caps_lock) status |= 1 << 4;
-
+    static uint8_t previous_mods = 0xff;
+    static uint8_t previous_profile = 0xff;
+    static bool previous_caps;
     keyboard_profile_t profile = active_profile();
-    status |= profile << 5;
-    static uint8_t previous_status = 0xFF;
-    if (status == previous_status) {
-        return;
+    uint8_t mods = get_mods() | get_weak_mods();
+    bool caps = host_keyboard_led_state().caps_lock;
+    bool first = previous_profile == 0xff;
+    uint8_t changed = first ? 0xff : mods ^ previous_mods;
+    if (profile != previous_profile) {
+        const char *label = profile == PROFILE_MAC ? PSTR("MAC") :
+                            profile == PROFILE_NON_MAC ? PSTR("NO MAC") : PSTR("DEFAULT");
+        write_status_line(2, label, false);
     }
-    previous_status = status;
-
-    oled_clear();
-    draw_modifier_indicator(3, label_shift, sizeof(label_shift), status & (1 << 0));
-    draw_modifier_indicator(28, label_ctrl, sizeof(label_ctrl), status & (1 << 1));
-    draw_modifier_indicator(53, label_alt, sizeof(label_alt), status & (1 << 2));
-    draw_modifier_indicator(78, label_cmd, sizeof(label_cmd), status & (1 << 3));
-    draw_modifier_indicator(103, label_caps, sizeof(label_caps), status & (1 << 4));
-    draw_profile(profile, status & (1 << 3));
+    if (changed & MOD_MASK_SHIFT) write_status_line(28, PSTR("SHIFT"), mods & MOD_MASK_SHIFT);
+    if (changed & MOD_MASK_CTRL)  write_status_line(49, PSTR("CONTROL"), mods & MOD_MASK_CTRL);
+    if (changed & MOD_MASK_ALT)   write_status_line(70, PSTR("ALT"), mods & MOD_MASK_ALT);
+    if ((changed & MOD_MASK_GUI) || profile != previous_profile) {
+        write_status_line(91, profile == PROFILE_NON_MAC ? PSTR("WKEY") : PSTR("CMD"), mods & MOD_MASK_GUI);
+    }
+    if (first || previous_caps != caps) write_status_line(112, PSTR("CAPS"), caps);
+    previous_mods = mods;
+    previous_caps = caps;
+    previous_profile = profile;
 }
 
 static void draw_layer_box(uint8_t x, uint8_t y, uint8_t number, bool active) {

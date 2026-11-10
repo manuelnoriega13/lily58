@@ -28,7 +28,7 @@ La tecla principal del pulgar izquierdo es GUI en el archivo exportado (fila 4, 
 | Perfil en OLED | Selección automática | Pulgar + C | Tecla física Ctrl izquierda |
 |---|---|---|---|
 | MAC | macOS, iOS e iPadOS identificado como iOS | Cmd+C | Ctrl |
-| NON-MAC | Windows, Linux y cualquier equipo identificado por QMK como Linux | Ctrl+C | GUI |
+| NO MAC | Windows, Linux y cualquier equipo identificado por QMK como Linux | Ctrl+C | GUI |
 | DEFAULT | Arranque, OS_UNSURE o valor desconocido | GUI+C, tal como está exportado | Ctrl |
 
 La detección usa la heurística USB oficial en la mitad maestra. Android y ChromeOS dependen del resultado que entregue esa heurística. En un dock o KVM que mantenga el teclado alimentado, si el perfil queda desactualizado, reconectá el USB o elegí el modo manual.
@@ -61,12 +61,12 @@ El reset de mapa de este fork copia 4 × 10 × 6 keycodes de flash y restablece 
 
 ## OLED y validación
 
-Se conserva la rotación de 270°, los cinco recuadros de modificadores/Caps de la pantalla principal y los cuatro indicadores de capa de la secundaria. El perfil se dibuja con glifos de 3 × 5 en las filas 79–83 del recuadro CMD, antes de la etiqueta existente que empieza en la fila 84. Los glifos invierten el color con ese recuadro. El redibujado depende del cambio de estado. Se conservan la suspensión del controlador y la sincronización split de capas, modificadores y LED. Como el indicador está junto al USB, no requiere otro mensaje entre mitades.
+El OLED izquierdo muestra el perfil arriba (MAC, NO MAC o DEFAULT) y cinco líneas de texto: SHIFT, CONTROL, ALT, CMD o WKEY, y CAPS. WKEY identifica el modificador GUI cuando el perfil efectivo es NO MAC. El texto se invierte al activar cada modificador; CAPS sigue el estado de bloqueo informado por el host. Solo se actualizan las líneas que cambian. El OLED derecho conserva los cuatro indicadores de capa.
 
 | Verificación realizada | Resultado |
 |---|---|
-| Build AVR con LTO y comprobación de tamaño de Caterina | 25.584 / 28.672 bytes de flash de aplicación, 3.088 libres |
-| SRAM según el ELF | 212 bytes de datos + 1.364 de BSS = 1.576 / 2.560 bytes. Quedan 984 para pila y uso dinámico; el pico real requiere hardware |
+| Build AVR con LTO y comprobación de tamaño de Caterina | 25.570 / 28.672 bytes de flash de aplicación, 3.102 libres |
+| SRAM según el ELF | 212 bytes de datos + 1.365 de BSS = 1.577 / 2.560 bytes. Quedan 983 para pila y uso dinámico; el pico real requiere hardware |
 | Datos del HEX comparados con el .vil por dirección de símbolo del ELF | 240 posiciones, 4 entradas de Tap Dance específicas, 16 overrides y 49 bytes de macros coinciden. Las demás entradas usan los valores vacíos del fork |
 | Definición Vial generada | Se descomprimió y coincidió con vial.json, incluidas las cuatro teclas User |
 | Selección de perfiles | 24 casos con los tipos del fork: cuatro modos × cinco OS conocidos por la API y un valor fuera del enum |
