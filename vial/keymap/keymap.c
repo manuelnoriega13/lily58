@@ -31,6 +31,7 @@
 #include QMK_KEYBOARD_H
 
 #include <stdio.h>
+#include "profiles.h"
 
 enum layer_number {
 
@@ -44,178 +45,56 @@ enum layer_number {
 
 };
 
-#define RAISE MO(_RAISE)
-
-#define LOWER MO(_LOWER)
-
+// Orden de matriz de Vial (10 x 6); los dos huecos físicos son KC_NO.
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-
-    /* QWERTY
-
-     * ,-----------------------------------------.                    ,-----------------------------------------.
-
-     * | ESC  |   1  |   2  |   3  |   4  |   5  |                    |   6  |   7  |   8  |   9  |   0  |  \~   |
-
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-
-     * | Tab  |   Q  |   W  |   E  |   R  |   T  |                    |   Y  |   U  |   I  |   O  |   P  |  -   |
-
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-
-     * |LCTRL |   A  |   S  |   D  |   F  |   G  |-------.    ,-------|   H  |   J  |   K  |   L  |   ;  |  '   |
-
-     * |------+------+------+------+------+------|   [   |    |    ]  |------+------+------+------+------+------|
-
-     * |LShift|   Z  |   X  |   C  |   V  |   B  |-------|    |-------|   N  |   M  |   ,  |   .  |   /  |RShift|
-
-     * `-----------------------------------------/       /     \      \\-----------------------------------------'
-
-     *                   |LOWER | LGUI | Alt  | /Space  /       \Enter \  |BackSP| RGUI |RAISE |
-
-     *                   |      |      |      |/       /         \      \ |      |      |      |
-
-     *                   `-------------------''-------'           '------''--------------------'
-
-     */
-
-    [_QWERTY] = LAYOUT(
-
-        KC_ESC, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9, KC_0, KC_GRV,
-
-        KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T, KC_Y, KC_U, KC_I, KC_O, KC_P, KC_MINS,
-
-        KC_LCTL, KC_A, KC_S, KC_D, KC_F, KC_G, KC_H, KC_J, KC_K, KC_L, KC_SCLN, KC_QUOT,
-
-        KC_LSFT, KC_Z, KC_X, KC_C, KC_V, KC_B, KC_LBRC, KC_RBRC, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, KC_RSFT,
-
-        LOWER, KC_LGUI, KC_LALT, KC_SPC, KC_ENT, KC_BSPC, KC_RGUI, RAISE
-
-        ),
-
-    /* LOWER
-
-     * ,-----------------------------------------.                    ,-----------------------------------------.
-
-     * |      |      |      |      |      |      |                    |      |      |      |      |      |      |
-
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-
-     * |      |   !  |   @  |   #  |   $  |   %  |                    |   ^  |   &  |   *  |   (  |   )  |      |
-
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-
-     * |      |   1  |   2  |   3  |   4  |   5  |-------.    ,-------|   6  |   7  |   8  |   9  |   0  |      |
-
-     * |------+------+------+------+------+------|   [   |    |    ]  |------+------+------+------+------+------|
-
-     * |      |      |      |      |      |      |-------|    |-------|   |  |   `  |   +  |   {  |   }  |      |
-
-     * `-----------------------------------------/       /     \      \\-----------------------------------------'
-
-     *                   |LOWER | LGUI | Alt  | /Space  /       \Enter \  |BackSP| RGUI |RAISE |
-
-     *                   |      |      |      |/       /         \      \ |      |      |      |
-
-     *                   `-------------------''-------'           '------''--------------------'
-
-     */
-
-    [_LOWER] = LAYOUT(
-
-        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-
-        _______, KC_EXLM, KC_AT, KC_HASH, KC_DLR, KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, _______,
-
-        _______, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9, KC_0, _______,
-
-        _______, _______, _______, _______, _______, _______, _______, _______, KC_PIPE, KC_GRAVE, KC_PLUS, KC_LCBR, KC_RCBR, _______,
-
-        _______, _______, _______, _______, _______, _______, _______, _______
-
-        ),
-
-    /* RAISE
-
-     * ,-----------------------------------------.                    ,-----------------------------------------.
-
-     * |      |      |      |      |      |      |                    |      |      |      |      |      |      |
-
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-
-     * |  F1  |  F2  |  F3  |  F4  |  F5  |  F6  |                    |  F7  |  F8  |  F9  | F10  | F11  | F12  |
-
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-
-     * |      |      |      |      |      |      |-------.    ,-------|      | Left | Down |  Up  |Right |      |
-
-     * |------+------+------+------+------+------|   [   |    |    ]  |------+------+------+------+------+------|
-
-     * |      |      |      |      |      |      |-------|    |-------|   +  |   =  |   [  |   ]  |   \  |      |
-
-     * `-----------------------------------------/       /     \      \\-----------------------------------------'
-
-     *                   |LOWER | LGUI | Alt  | /Space  /       \Enter \  |BackSP| RGUI |RAISE |
-
-     *                   |      |      |      |/       /         \      \ |      |      |      |
-
-     *                   `-------------------''-------'           '------''--------------------'
-
-     */
-
-    [_RAISE] = LAYOUT(
-
-        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-
-        KC_F1, KC_F2, KC_F3, KC_F4, KC_F5, KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_F11, KC_F12,
-
-        _______, _______, _______, _______, _______, _______, XXXXXXX, KC_LEFT, KC_DOWN, KC_UP, KC_RGHT, XXXXXXX,
-
-        _______, _______, _______, _______, _______, _______, _______, _______, KC_PLUS, KC_EQL, KC_LBRC, KC_RBRC, KC_BSLS, _______,
-
-        _______, _______, _______, _______, _______, _______, _______, _______
-
-        ),
-
-    /* ADJUST
-
-     * ,-----------------------------------------.                    ,-----------------------------------------.
-
-     * |      |      |      |      |      |      |                    |      |      |      |      |      |      |
-
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-
-     * |      |      |      |      |      |      |                    |      |      |      |      |      |      |
-
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-
-     * |      |      |      |      |      |      |-------.    ,-------|      |      |      |      |      |      |
-
-     * |------+------+------+------+------+------|       |    |       |------+------+------+------+------+------|
-
-     * |      |      |      |      |      |      |-------|    |-------|      |      |      |      |      |      |
-
-     * `-----------------------------------------/       /     \      \\-----------------------------------------'
-
-     *                   |LOWER | LGUI | Alt  | /Space  /       \Enter \  |BackSP| RGUI |RAISE |
-
-     *                   |      |      |      |/       /         \      \ |      |      |      |
-
-     *                   `----------------------------'           '------''--------------------'
-
-     */
-
-    [_ADJUST] = LAYOUT(
-
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-
-        _______, _______, _______, _______, _______, _______, _______, _______)
-
+    [_QWERTY] = {
+        {KC_GRAVE, KC_1, KC_2, KC_3, KC_4, KC_5},
+        {KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T},
+        {TD(0), KC_A, KC_S, KC_D, KC_F, KC_G},
+        {KC_LCTL, KC_Z, KC_X, KC_C, KC_V, KC_B},
+        {KC_NO, KC_LALT, KC_ESCAPE, TD(1), KC_LGUI, KC_LBRC},
+        {KC_BSPC, KC_0, KC_9, KC_8, KC_7, KC_6},
+        {KC_BSLS, KC_P, KC_O, KC_I, KC_U, KC_Y},
+        {KC_QUOTE, KC_SCLN, KC_L, KC_K, KC_J, KC_H},
+        {KC_ENTER, KC_SLASH, KC_DOT, KC_COMMA, KC_M, KC_N},
+        {KC_NO, LCTL(KC_UP), KC_ESCAPE, TD(2), KC_SPACE, KC_RBRC},
+    },
+    [_LOWER] = {
+        {KC_TRNS, KC_INSERT, KC_HOME, KC_PGUP, MC_1, MC_2},
+        {KC_TRNS, KC_DELETE, KC_END, KC_PGDN, KC_NO, KC_NO},
+        {KC_TRNS, KC_NO, KC_UP, KC_NO, KC_NO, KC_NO},
+        {KC_TRNS, KC_LEFT, KC_DOWN, KC_RIGHT, KC_NO, KC_NO},
+        {KC_NO, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO},
+        {KC_TRNS, KC_EQUAL, KC_MINUS, KC_PMNS, KC_KP_ASTERISK, KC_KP_SLASH},
+        {KC_NO, KC_MINUS, KC_PPLS, KC_9, KC_8, KC_7},
+        {KC_NO, KC_NO, KC_KP_DOT, KC_6, KC_5, KC_4},
+        {KC_TRNS, KC_NO, KC_KP_EQUAL, KC_3, KC_2, KC_1},
+        {KC_NO, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_KP_0},
+    },
+    [_RAISE] = {
+        {KC_F1, KC_F2, KC_F3, KC_F4, KC_F5, KC_F6},
+        {KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_TRNS, KC_NO, KC_UP, KC_NO, KC_NO, KC_NO},
+        {KC_TRNS, KC_LEFT, KC_DOWN, KC_RIGHT, KC_NO, KC_NO},
+        {KC_NO, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO},
+        {KC_TRNS, KC_F11, KC_F10, KC_F9, KC_F8, KC_F7},
+        {KC_PGUP, KC_F12, KC_NO, KC_MNXT, KC_MPLY, KC_MPRV},
+        {KC_PGDN, KC_NO, KC_NO, KC_VOLU, KC_VOLD, KC_MUTE},
+        {KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_NO, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO},
+    },
+    [_ADJUST] = {
+        {KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_NO, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO},
+        {KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO},
+        {KC_NO, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO},
+    },
 };
 
 #ifdef OLED_ENABLE
@@ -294,6 +173,23 @@ static void draw_modifier_indicator(uint8_t y, const uint8_t *label, uint8_t len
     }
 }
 
+// 3x5 column masks (bit 0 at the top), in the empty strip above CMD.
+static void draw_profile(keyboard_profile_t profile, bool inverted) {
+    static const uint8_t labels[][21] PROGMEM = {
+        [PROFILE_DEFAULT] = {31,17,14, 31,21,17, 31,5,1, 30,5,30, 31,16,31, 31,16,16, 1,31,1},
+        [PROFILE_MAC]     = {31,2,31, 30,5,30, 14,17,17},
+        [PROFILE_NON_MAC] = {31,6,31, 14,17,14, 31,6,31, 4,4,4, 31,2,31, 30,5,30, 14,17,17},
+    };
+    uint8_t letters = profile == PROFILE_MAC ? 3 : 7;
+    for (uint8_t i = 0; i < letters * 3; ++i) {
+        uint8_t bits = pgm_read_byte(&labels[profile][i]);
+        uint8_t x = (33 - letters * 4) / 2 + i + i / 3;
+        for (uint8_t y = 0; y < 5; ++y) {
+            oled_write_pixel(x, 79 + y, ((bits >> y) & 1) != inverted);
+        }
+    }
+}
+
 static void render_mod_status(void) {
     uint8_t mods   = get_mods();
     led_t   leds   = host_keyboard_led_state();
@@ -305,6 +201,8 @@ static void render_mod_status(void) {
     if (mods & MOD_MASK_GUI) status |= 1 << 3;
     if (leds.caps_lock) status |= 1 << 4;
 
+    keyboard_profile_t profile = active_profile();
+    status |= profile << 5;
     static uint8_t previous_status = 0xFF;
     if (status == previous_status) {
         return;
@@ -317,6 +215,7 @@ static void render_mod_status(void) {
     draw_modifier_indicator(53, label_alt, sizeof(label_alt), status & (1 << 2));
     draw_modifier_indicator(78, label_cmd, sizeof(label_cmd), status & (1 << 3));
     draw_modifier_indicator(103, label_caps, sizeof(label_caps), status & (1 << 4));
+    draw_profile(profile, status & (1 << 3));
 }
 
 static void draw_layer_box(uint8_t x, uint8_t y, uint8_t number, bool active) {

@@ -10,7 +10,7 @@
 
 /* Space reduction & Layout */
 #define DYNAMIC_KEYMAP_LAYER_COUNT 4
-#define DYNAMIC_KEYMAP_MACRO_EEPROM_SIZE 512
+// Vial uses the remaining physical EEPROM for macros after the overrides.
 #define VIAL_TAP_DANCE_ENTRIES 16
 #define VIAL_KEY_OVERRIDE_ENTRIES 16
 #undef LOCKING_SUPPORT_ENABLE
