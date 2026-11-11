@@ -24,6 +24,9 @@
 
 #define USE_SERIAL_PD2
 
+// Mantener encendidos los dos OLED durante la inactividad.
+#define OLED_TIMEOUT 0
+
 #define TAPPING_FORCE_HOLD
 #define TAPPING_TERM 200
 

@@ -61,12 +61,14 @@ El reset de mapa de este fork copia 4 × 10 × 6 keycodes de flash y restablece 
 
 ## OLED y validación
 
+Ambos OLED permanecen encendidos durante la inactividad (`OLED_TIMEOUT 0`) mientras el teclado recibe alimentación.
+
 El OLED izquierdo muestra el perfil arriba (MAC, NO MAC o DEFAULT) y cinco líneas de texto: SHIFT, CONTROL, ALT, CMD o WKEY, y CAPS. WKEY identifica el modificador GUI cuando el perfil efectivo es NO MAC. El texto se invierte al activar cada modificador; CAPS sigue el estado de bloqueo informado por el host. Solo se actualizan las líneas que cambian. El OLED derecho conserva los cuatro indicadores de capa.
 
 | Verificación realizada | Resultado |
 |---|---|
-| Build AVR con LTO y comprobación de tamaño de Caterina | 25.570 / 28.672 bytes de flash de aplicación, 3.102 libres |
-| SRAM según el ELF | 212 bytes de datos + 1.365 de BSS = 1.577 / 2.560 bytes. Quedan 983 para pila y uso dinámico; el pico real requiere hardware |
+| Build AVR con LTO y comprobación de tamaño de Caterina | 25.332 / 28.672 bytes de flash de aplicación, 3.340 libres |
+| SRAM según el ELF | 212 bytes de datos + 1.361 de BSS = 1.573 / 2.560 bytes. Quedan 987 para pila y uso dinámico; el pico real requiere hardware |
 | Datos del HEX comparados con el .vil por dirección de símbolo del ELF | 240 posiciones, 4 entradas de Tap Dance específicas, 16 overrides y 49 bytes de macros coinciden. Las demás entradas usan los valores vacíos del fork |
 | Definición Vial generada | Se descomprimió y coincidió con vial.json, incluidas las cuatro teclas User |
 | Selección de perfiles | 24 casos con los tipos del fork: cuatro modos × cinco OS conocidos por la API y un valor fuera del enum |
